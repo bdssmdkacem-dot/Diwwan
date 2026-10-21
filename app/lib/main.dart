@@ -193,7 +193,7 @@ class _EditorPageState extends State<EditorPage> {
       return;
     }
     setState(() => listening = true);
-    await speech.listen(options: stt.SpeechListenOptions(localeId: speechLocaleFor(language)), onResult: (result) {
+    await speech.listen(localeId: speechLocaleFor(language), onResult: (result) {
       if (result.finalResult && result.recognizedWords.trim().isNotEmpty) {
         final next = '${body.text}${body.text.isEmpty ? '' : '\n'}${result.recognizedWords.trim()}';
         body.value = TextEditingValue(text: next, selection: TextSelection.collapsed(offset: next.length));
