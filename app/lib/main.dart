@@ -131,7 +131,13 @@ class _HomePageState extends State<HomePage> {
           title: Text(e.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold)),
           subtitle: Text('${lecture ? 'محاضرة' : 'تقرير'} • ${e.body}', maxLines: 2, overflow: TextOverflow.ellipsis),
           onTap: () => _edit(e.kind, existing: e),
-          trailing: PopupMenuButton<String>(onSelected: (v) async { if (v == 'edit') await _edit(e.kind, existing: e); if (v == 'delete') { await LocalNotes.remove(e.id!); _refresh(); } }, itemBuilder: (_) => const [
+          trailing: PopupMenuButton<String>(onSelected: (v) async { if (v == 'edit') {
+              await _edit(e.kind, existing: e);
+            }
+            if (v == 'delete') {
+              await LocalNotes.remove(e.id!);
+              _refresh();
+            } }, itemBuilder: (_) => const [
             PopupMenuItem(value: 'edit', child: Text('فتح وتعديل')), PopupMenuItem(value: 'delete', child: Text('حذف')),
           ]),
         ));
@@ -212,7 +218,9 @@ class _EditorPageState extends State<EditorPage> {
       return;
     }
     setState(() => listening = true);
-    await speech.listen(localeId: speechLocaleFor(language), onResult: (result) {
+    await speech.listen(
+      options: stt.SpeechListenOptions(localeId: speechLocaleFor(language)),
+      onResult: (result) {
       if (result.finalResult && result.recognizedWords.trim().isNotEmpty) {
         final next = '${body.text}${body.text.isEmpty ? '' : '\n'}${result.recognizedWords.trim()}';
         body.value = TextEditingValue(text: next, selection: TextSelection.collapsed(offset: next.length));
