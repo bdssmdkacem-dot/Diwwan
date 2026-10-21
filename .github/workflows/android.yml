@@ -1,0 +1,31 @@
+name: Flutter Android checks
+on:
+  push:
+    branches: [main, 'feat/**']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter create --platforms=android .
+      # Flutter create adds a sample test referencing MyApp; this app supplies its own tests.
+      - run: rm -f test/widget_test.dart
+      - run: flutter pub get
+      - run: dart format lib test
+      - run: flutter analyze
+      - run: flutter test
+      - run: flutter build apk --debug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: diwwan-debug-apk
+          path: app/build/app/outputs/flutter-apk/app-debug.apk
