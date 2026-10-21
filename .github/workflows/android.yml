@@ -18,6 +18,8 @@ jobs:
           channel: stable
           cache: true
       - run: flutter create --platforms=android .
+      # Flutter create adds a sample test referencing MyApp; this app supplies its own tests.
+      - run: rm -f test/widget_test.dart
       - run: flutter pub get
       - run: dart format lib test
       - run: flutter analyze
