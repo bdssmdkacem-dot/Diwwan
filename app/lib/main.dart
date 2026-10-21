@@ -185,15 +185,34 @@ class _EditorPageState extends State<EditorPage> {
   }
 
   Future<void> _transcribe() async {
-    if (listening) { await speech.stop(); setState(() => listening = false); return; }
-    final ready = await speech.initialize(onStatus: (s) { if ((s == 'done' || s == 'notListening') && mounted) setState(() => listening = false); },
-      onError: (e) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('تعذر التفريغ: ${e.errorMsg}'))); });
+    if (listening) {
+      await speech.stop();
+      setState(() => listening = false);
+      return;
+    }
+    final ready = await speech.initialize(onStatus: (s) {
+        if ((s == 'done' || s == 'notListening') && mounted) {
+          setState(() => listening = false);
+        }
+      },
+      onError: (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('تعذر التفريغ: ${e.errorMsg}')),
+          );
+        }
+      },
+    );
     if (!ready) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('خدمة التعرف على الكلام غير متاحة على هذا الجهاز.')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('خدمة التعرف على الكلام غير متاحة على هذا الجهاز.')),
+        );
+      }
       return;
     }
     setState(() => listening = true);
-    await speech.listen(localeId: speechLocaleFor(language), onResult: (result) {
+    await speech.listen(options: stt.SpeechListenOptions(localeId: speechLocaleFor(language)), onResult: (result) {
       if (result.finalResult && result.recognizedWords.trim().isNotEmpty) {
         final next = '${body.text}${body.text.isEmpty ? '' : '\n'}${result.recognizedWords.trim()}';
         body.value = TextEditingValue(text: next, selection: TextSelection.collapsed(offset: next.length));
